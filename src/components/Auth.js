@@ -1,6 +1,6 @@
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "../firebase-config.js";
-import "./Auth.css";
+import '../styles/Auth.css';
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();

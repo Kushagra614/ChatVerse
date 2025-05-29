@@ -2,7 +2,7 @@ import React from 'react';
 import { Chat } from './components/Chat';
 import { Auth } from './components/Auth';
 import Cookies from 'universal-cookie';
-import './App.css';
+import './styles/app.css';
 
 const cookies = new Cookies();
 
