@@ -1,6 +1,6 @@
 import React from 'react';
-import { Chat } from './components/Chat';
-import { Auth } from './components/Auth';
+import { Chat } from './components/Chat.jsx';
+import { Auth } from './components/Auth.jsx';
 import Cookies from 'universal-cookie';
 import './styles/app.css';
 
