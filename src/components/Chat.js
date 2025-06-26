@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { db, auth } from "../firebase-config";
 import {
   collection,
@@ -16,6 +16,7 @@ export const Chat = ({ room }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesRef = collection(db, "messages");
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     const queryMessages = query(
@@ -40,6 +41,13 @@ export const Chat = ({ room }) => {
 
     return () => unsuscribe();
   }, [room]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -87,6 +95,7 @@ export const Chat = ({ room }) => {
             </div>
           ))
         )}
+        <div ref={messagesEndRef} />
       </div>
       <form onSubmit={handleSubmit} className="new-message-form">
         <input

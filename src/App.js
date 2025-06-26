@@ -75,24 +75,26 @@ function ChatApp() {
       {room ? (
         <Chat room={room} />
       ) : (
-        <div className="room">
-          <h2>Welcome to ChatVerse! 🚀</h2>
-          <p>Enter a room name to start chatting with others</p>
-          <label htmlFor="room">Room Name</label>
-          <input
-            id="room"
-            type="text"
-            placeholder="Enter room name..."
-            value={roomInput}
-            onChange={(e) => setRoomInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-          />
-          <button 
-            onClick={handleJoinRoom}
-            disabled={!roomInput.trim()}
-          >
-            <span>Join Room</span>
-          </button>
+        <div className="room-center-wrapper">
+          <div className="room">
+            <h2>Welcome to ChatVerse! 🚀</h2>
+            <p>Enter a room name to start chatting with others</p>
+            <label htmlFor="room">Room Name</label>
+            <input
+              id="room"
+              type="text"
+              placeholder="Enter room name..."
+              value={roomInput}
+              onChange={(e) => setRoomInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+            />
+            <button 
+              onClick={handleJoinRoom}
+              disabled={!roomInput.trim()}
+            >
+              <span>Join Room</span>
+            </button>
+          </div>
         </div>
       )}
     </div>

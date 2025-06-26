@@ -42,6 +42,17 @@
     padding: 0;
   }
   
+  html, body {
+    height: 100vh;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    line-height: 1.5;
+    text-rendering: optimizeSpeed;
+    /* overflow: hidden; */
+  }
+  
   html {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
@@ -57,6 +68,7 @@
   
   /* App Container */
   .app-container {
+    height: 100vh;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -90,7 +102,7 @@
     box-shadow: var(--shadow-md);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 200;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--color-border);
@@ -253,7 +265,7 @@
     -webkit-backdrop-filter: blur(8px);
     width: 90%;
     max-width: 500px;
-    margin: var(--spacing-xl) auto;
+    margin: 0 auto;
     position: relative;
     overflow: hidden;
     will-change: transform;
@@ -565,4 +577,16 @@
     .room input:focus {
       transform: none;
     }
+  }
+  
+  .room-center-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .messages {
+    padding-bottom: 180px;
   } 

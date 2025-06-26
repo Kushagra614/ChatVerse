@@ -1,5 +1,6 @@
 .chat-app {
   display: flex;
+  /* text-align: center; */
   flex-direction: column;
   height: 100vh;
   background: linear-gradient(135deg, var(--color-background-light) 0%, var(--color-background-dark) 100%);
@@ -14,7 +15,7 @@
   box-shadow: var(--shadow-md);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 200;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
@@ -57,7 +58,7 @@
 }
 
 .messages {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
   padding: var(--spacing-lg);
   display: flex;
@@ -65,8 +66,8 @@
   gap: var(--spacing-md);
   background: transparent;
   scroll-behavior: smooth;
-  height: calc(100vh - 180px); /* Account for header and input box */
   margin-bottom: 0;
+  padding-bottom: 140px;
 }
 
 .message {
