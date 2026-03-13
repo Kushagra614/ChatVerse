@@ -29,6 +29,10 @@ yarn-error.log*
 *.swp
 *.swo
 
+# Local development files
+.sqltools.json
+queries.sql
+
 # Firebase
 .firebase/
 firebase-debug.log
