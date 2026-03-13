@@ -1,46 +1,93 @@
 import React, { useState, useEffect, useRef } from "react";
-import { db, auth } from "../firebase-config";
-import {
-  collection,
-  addDoc,
-  where,
-  serverTimestamp,
-  onSnapshot,
-  query,
-  orderBy,
-} from "firebase/firestore";
-
+import { io } from "socket.io-client";
+import { auth } from "../firebase-config";
 import '../styles/Chat.css';
 
 export const Chat = ({ room }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const messagesRef = collection(db, "messages");
+  const [token, setToken] = useState(null);
   const messagesEndRef = useRef(null);
+  const socketRef = useRef(null);
+  const currentUser = auth.currentUser;
 
   useEffect(() => {
-    const queryMessages = query(
-      messagesRef,
-      where("room", "==", room)
-    );
-    
-    const unsuscribe = onSnapshot(queryMessages, (snapshot) => {
-      let messages = [];
-      snapshot.forEach((doc) => {
-        messages.push({ ...doc.data(), id: doc.id });
-      });
-      // Sort messages by timestamp after receiving them
-      messages.sort((a, b) => {
-        if (a.createdAt && b.createdAt) {
-          return a.createdAt.toDate() - b.createdAt.toDate();
-        }
-        return 0;
-      });
-      setMessages(messages);
+    // Sync user with backend and get JWT token
+    const syncUser = async () => {
+      if (!currentUser) return;
+      
+      try {
+        const response = await fetch('http://localhost:4000/api/sync-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firebaseUid: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName,
+          }),
+        });
+        const data = await response.json();
+        setToken(data.token);
+      } catch (err) {
+        console.error('Failed to sync user:', err);
+      }
+    };
+
+    syncUser();
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!token) return;
+
+    // Connect to Socket.IO server with JWT token
+    socketRef.current = io('http://localhost:4000', {
+      reconnection: true,
+      auth: { token },
     });
 
-    return () => unsuscribe();
-  }, [room]);
+    // Join room with Firebase user info
+    if (currentUser) {
+      socketRef.current.emit('joinRoom', {
+        room,
+        firebaseUid: currentUser.uid,
+        email: currentUser.email,
+        displayName: currentUser.displayName,
+      });
+    }
+
+    // Fetch existing messages with JWT token
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(`http://localhost:4000/api/messages/${room}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        const msgs = await response.json();
+        setMessages(msgs);
+      } catch (err) {
+        console.error('Failed to fetch messages:', err);
+      }
+    };
+    fetchMessages();
+
+    // Listen for new messages
+    socketRef.current.on('newMessage', (message) => {
+      setMessages(prev => [...prev, message]);
+    });
+
+    socketRef.current.on('userJoined', (data) => {
+      console.log(`${data.displayName} joined ${data.room}`);
+    });
+
+    socketRef.current.on('userLeft', (data) => {
+      console.log(`${data.displayName} left the room`);
+    });
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, [room, currentUser, token]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -52,11 +99,11 @@ export const Chat = ({ room }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (newMessage === "") return;
-    await addDoc(messagesRef, {
+    if (newMessage.trim() === "") return;
+    
+    // Send message via Socket.IO
+    socketRef.current.emit('sendMessage', {
       text: newMessage,
-      createdAt: serverTimestamp(),
-      user: auth.currentUser.displayName,
       room,
     });
 
@@ -65,7 +112,7 @@ export const Chat = ({ room }) => {
 
   const formatTime = (timestamp) => {
     if (!timestamp) return '';
-    const date = timestamp.toDate();
+    const date = new Date(timestamp);
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
@@ -83,14 +130,14 @@ export const Chat = ({ room }) => {
           messages.map((message) => (
             <div 
               key={message.id} 
-              className={`message ${message.user === auth.currentUser?.displayName ? 'sent' : 'received'}`}
+              className={`message ${message.display_name === currentUser?.displayName ? 'sent' : 'received'}`}
             >
               <div className="message-header">
-                <span className="user">{message.user}</span>
+                <span className="user">{message.display_name}</span>
               </div>
               <div className="message-content">
                 {message.text}
-                <span className="message-time">{formatTime(message.createdAt)}</span>
+                <span className="message-time">{formatTime(message.created_at)}</span>
               </div>
             </div>
           ))
