@@ -138,23 +138,7 @@ npm run server
 
 ## 🔌 API Endpoints
 
-### **Authentication**
-```http
-POST /api/sync-user
-Content-Type: application/json
 
-{
-  "firebaseUid": "google-oauth-abc123",
-  "email": "user@gmail.com",
-  "displayName": "John Doe"
-}
-
-Response:
-{
-  "user": { id, firebase_uid, email, display_name, created_at },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
 
 ### **Get Messages**
 ```http
@@ -304,64 +288,7 @@ const messages = await response.json();
 
 ---
 
-## 🔄 Complete Data Flow
-
-### **1. User Authenticates**
-```
-User → [Google OAuth] → Firebase → Frontend receives uid + email
-```
-
-### **2. User Syncs to Database**
-```
-Frontend POST /api/sync-user
-  ↓
-Backend getOrCreateUser()
-  ↓
-PostgreSQL INSERT or SELECT
-  ↓
-JWT token generated & returned
-```
-
-### **3. User Joins Room**
-```
-Frontend socket.io connect with JWT
-  ↓
-Backend verifies JWT
-  ↓
-socket.join('room-name')
-  ↓
-Broadcast 'userJoined' to all in room
-```
-
-### **4. User Sends Message**
-```
-Frontend socket.emit('sendMessage')
-  ↓
-Backend INSERT to PostgreSQL
-  ↓
-Query user display_name
-  ↓
-Broadcast to room (<50ms)
-  ↓
-Frontend receives & displays instantly
-```
-
-### **5. User Loads History**
-```
-Frontend GET /api/messages/:room with JWT
-  ↓
-Backend verifies JWT
-  ↓
-PostgreSQL SELECT with JOIN
-  ↓
-Return messages with display names
-  ↓
-Frontend renders full chat history
-```
-
----
-
-## 📚 Available NPM Scripts
+##  Available NPM Scripts
 
 ```bash
 npm run dev           # Start Vite frontend only (port 5173)
